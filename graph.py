@@ -29,13 +29,15 @@ G = nx.Graph()
 
 w2v = dict()
 
+epsilon = 2.0
+
 for k in range(0, len(vectors)):
     word = corpus[k]
     vector = vectors[k]
 
     w2v[word] = vector
 
-for i in range(0, 50):
+for i in range(0, 500):
     w_i = corpus[i]
     if w_i in model:
         G.add_node(w_i)
@@ -43,9 +45,11 @@ for i in range(0, 50):
             if w_j in model:
                 # connect w_i and w_j together with edge weight of similarity
                 G.add_node(w_j)
-                G.add_edge(w_i, w_j, weight=1 - similarity(w2v[w_i], w2v[w_j]))
+                if distance(w2v[w_i], w2v[w_j]) < epsilon:
+                    similarity_cost = 1 - similarity(w2v[w_i], w2v[w_j]);
+                    G.add_edge(w_i, w_j, weight=similarity_cost)
 
-nx.draw(G, with_labels=True, font_weight='bold')
+nx.draw(G, with_labels=True, font_weight='light')
 plt.show()
 
 """word_1 = 'dismal'
