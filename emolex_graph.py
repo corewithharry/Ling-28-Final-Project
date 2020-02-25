@@ -1,5 +1,7 @@
 """
 Algorithm for generating bidirected graph relating words with sentiment and context.
+SentiNode
+SentiGraph: 
 """ 
 import random
 import networkx as nx
@@ -32,10 +34,9 @@ G = nx.Graph()
 w2v = dict()
 
 epsilon = 2.0
-probability_scaler = 1.0
 cost_threshold = 0.6 # the maximum edge weight
 
-# prob_model = generate_MLE('datasets/small_reviews/pos', 'datasets/small_reviews/neg')
+prob_model = generate_MLE('datasets/small_reviews/pos', 'datasets/small_reviews/neg')
 
 options = {
     'node_color': 'blue',
@@ -48,7 +49,7 @@ emolex = generate_emolex_vectors(EMOLEX_PATH)
 locations = emolex.keys()
 
 i = 0
-maximum = 1000
+maximum = 25
 
 for w_i in emolex:
     G.add_node(w_i)
@@ -60,12 +61,16 @@ for w_i in emolex:
                 similarity_score = similarity(emolex[w_i], emolex[w_j])
                 similarity_cost = 1 - similarity_score
 
-                # prob_i_j = prob_model.score(w_i, [w_j])
-                # prob_j_i = prob_model.score(w_j, [w_i])
+                """
+                prob_i_j = prob_model.score(w_i, [w_j])
+                prob_j_i = prob_model.score(w_j, [w_i])
 
-                context_cost_i_to_j = 1 # / (probability_scaler * max(prob_i_j, 0.00001))
+                print(w_i + " -> " + w_j + " : " + str(prob_i_j))
+                print(w_i + " <- " + w_j + " : " + str(prob_j_i))
+
+                context_cost_i_to_j = 1 / (max(prob_i_j, 0.1))
                 # context_cost_j_to_i = 1 / max(prob_j_i, 0.00001)
-
+                """
                 colors = ['r','g','b']
 
                 if similarity_cost < cost_threshold:
@@ -84,5 +89,5 @@ colors = [G[u][v]['color'] for u,v in edges]
 weights = [G[u][v]['weight'] for u,v in edges]
 
 # nx.draw(G, pos, edges=edges, edge_color=colors, width=weights, with_labels=True)
-nx.draw(G, pos, edges=edges, edge_color=colors, with_labels=True)
+nx.draw(G, pos, edges=edges, edge_color=colors, width=weights, with_labels=True)
 plt.show()
