@@ -36,7 +36,7 @@ w2v = dict()
 epsilon = 2.0
 cost_threshold = 0.6 # the maximum edge weight
 
-prob_model = generate_MLE('datasets/small_reviews/pos', 'datasets/small_reviews/neg')
+# prob_model = generate_MLE('datasets/small_reviews/pos', 'datasets/small_reviews/neg')
 
 options = {
     'node_color': 'blue',
@@ -49,33 +49,38 @@ emolex = generate_emolex_vectors(EMOLEX_PATH)
 locations = emolex.keys()
 
 i = 0
-maximum = 25
+maximum = 2500
+neutral = 0.09999999999999999
+
 
 for w_i in emolex:
-    G.add_node(w_i)
-    for w_j in list(G.nodes):
-        if w_i != w_j:
-            # connect w_i and w_j together with edge weight of similarity
+    if sum(emolex[w_i]) != neutral:
+        G.add_node(w_i)
+        for w_j in list(G.nodes):
+            if w_i != w_j:
+                # connect w_i and w_j together with edge weight of similarity
 
-            if distance(emolex[w_i], emolex[w_j]) < epsilon:
-                similarity_score = similarity(emolex[w_i], emolex[w_j])
-                similarity_cost = 1 - similarity_score
+                if distance(emolex[w_i], emolex[w_j]) < epsilon:
+                    similarity_score = similarity(emolex[w_i], emolex[w_j])
+                    similarity_cost = max(1 - similarity_score, 0.01)
 
-                """
-                prob_i_j = prob_model.score(w_i, [w_j])
-                prob_j_i = prob_model.score(w_j, [w_i])
+                    """
+                    prob_i_j = prob_model.score(w_i, [w_j])
+                    prob_j_i = prob_model.score(w_j, [w_i])
 
-                print(w_i + " -> " + w_j + " : " + str(prob_i_j))
-                print(w_i + " <- " + w_j + " : " + str(prob_j_i))
+                    print(w_i + " -> " + w_j + " : " + str(prob_i_j))
+                    print(w_i + " <- " + w_j + " : " + str(prob_j_i))
 
-                context_cost_i_to_j = 1 / (max(prob_i_j, 0.1))
-                # context_cost_j_to_i = 1 / max(prob_j_i, 0.00001)
-                """
-                colors = ['r','g','b']
+                    context_cost_i_to_j = 1 / (max(prob_i_j, 0.1))
+                    # context_cost_j_to_i = 1 / max(prob_j_i, 0.00001)
+                    """
+                    colors = ['r','g','b']
 
-                if similarity_cost < cost_threshold:
-                    G.add_edge(w_i, w_j, color=colors[random.randrange(0, 3)], weight=similarity_cost + context_cost_i_to_j)
-                # G.add_edge(w_j, w_i, weight=1/similarity_cost)
+                    if similarity_cost < cost_threshold:
+                        G.add_edge(w_i, w_j, color=colors[random.randrange(0, 3)], weight=similarity_cost)
+                    # G.add_edge(w_j, w_i, weight=1/similarity_cost)
+    else:
+        print("Neutral word: " + w_i)
 
     if i == maximum:
         break
@@ -89,5 +94,11 @@ colors = [G[u][v]['color'] for u,v in edges]
 weights = [G[u][v]['weight'] for u,v in edges]
 
 # nx.draw(G, pos, edges=edges, edge_color=colors, width=weights, with_labels=True)
-nx.draw(G, pos, edges=edges, edge_color=colors, width=weights, with_labels=True)
-plt.show()
+# nx.draw(G, pos, edges=edges, edge_color=colors, width=weights, with_labels=True)
+# plt.show()
+
+# started: 4:02pm
+# after 1 minute: 2500 nodes inserted
+# 4:05pm: 4100 nodes inserted
+
+nx.write_graphml(G, "output_" + str(maximum) + "_wo_neutral.graphml")
