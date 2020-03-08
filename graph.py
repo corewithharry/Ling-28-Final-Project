@@ -30,8 +30,12 @@ G = nx.Graph()
 # word to vec hash map
 w2v = dict()
 
+# maximum Euclidean distance between two words
 epsilon = 2.0
-probability_scaler = 1.0
+
+# value to scale the small probability with
+# probability_scaler = 1.0
+
 
 for k in range(0, len(vectors)):
     word = corpus[k]
@@ -39,7 +43,9 @@ for k in range(0, len(vectors)):
 
     w2v[word] = vector
 
-prob_model = generate_MLE('datasets/small_reviews/pos', 'datasets/small_reviews/neg')
+# model to generate probability between models
+# prob_model = generate_MLE('datasets/small_reviews/pos', 'datasets/small_reviews/neg')
+
 options = {
     'node_color': 'blue',
     'node_size': 100,

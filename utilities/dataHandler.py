@@ -14,7 +14,7 @@ from nltk.lm.preprocessing import pad_both_ends, padded_everygram_pipeline
 SMALL_MOVIE_REVIEWS_POS = '../datasets/small_reviews/pos'
 SMALL_MOVIE_REVIEWS_NEG = '../datasets/small_reviews/neg'
 CORPUS_OUTPUT = '../datasets/corpus/cornell_small.txt'
-VECTOR_OUTPUT = 'datasets/weights/cornell_small_vectors.csv'\
+VECTOR_OUTPUT = '../datasets/weights/cornell_small_vectors.csv'
 
 def generate_corpus(positive, negative):
     corpus = set();
