@@ -12,7 +12,8 @@ from gensim.models import Word2Vec
 from nltk.corpus import brown
 from utilities.vector import distance, similarity
 from utilities.dataHandler import get_corpus, generate_vectors, generate_MLE, generate_emolex_vectors
-
+from nltk import word_tokenize, sent_tokenize
+from nltk.tokenize.treebank import TreebankWordDetokenizer
 from nltk.lm import MLE, NgramCounter
 from nltk.util import ngrams
 from nltk.lm.preprocessing import pad_both_ends, padded_everygram_pipeline
@@ -46,7 +47,7 @@ emolex = generate_emolex_vectors(EMOLEX_PATH)
 locations = emolex.keys()
 
 # maximum number of words inside a graph
-maximum = 14000
+maximum = 14100
 i = 0
 
 # total summation of a neutral vector
@@ -68,6 +69,7 @@ endpoints = {
 k = 0
 
 for w_i in emolex:
+    w_i = word_tokenize(w_i)[0]
     if sum(emolex[w_i]) != neutral:
         G.add_node(w_i)
 
@@ -133,4 +135,5 @@ weights = [G[u][v]['weight'] for u,v in edges]"""
 # after 1 minute: 2500 nodes inserted
 # 4:05pm: 4100 nodes inserted
 
-nx.write_graphml(G, "graph_outputs/output_" + str(maximum) + "_wo_neutral.graphml")
+# nx.write_graphml(G, "graph_outputs/tokenized_output_" + str(maximum) + "_wo_neutral.graphml")
+nx.write_gpickle(G, "graph_outputs/pickled_output_" + str(maximum) + "_wo_neutral.gpickle")
