@@ -23,7 +23,6 @@ MODEL_PATH = "models/BrownWord2Vec.model"
 VECTOR_PATH = "datasets/weights/cornell_small_vectors.csv"
 EMOLEX_PATH = "datasets/emolex/emolex.txt"
 
-
 # brown_corpus = brown.sents()
 model = Word2Vec.load(MODEL_PATH) # Word2Vec(brown_corpus)
 # returns a list of uncategorized words in the corpus
@@ -36,9 +35,9 @@ G = nx.Graph()
 w2v = dict()
 
 # maximum Euclidean distance between two words
-epsilon = 2.0
-cost_threshold = 0.6 # the maximum edge weight
-endpoint_radius = 0.85 # minimum cosine similarity
+epsilon = 10.0
+cost_threshold = 0.95 # 0.6 # the maximum edge weight (1 - cos similarity) i.e. closer to 0 means similar, 1 means totally not similare
+endpoint_radius = 0.25 # 0.85 # minimum cosine similarity
 
 # prob_model = generate_MLE('datasets/small_reviews/pos', 'datasets/small_reviews/neg')
 
@@ -60,10 +59,12 @@ G.add_node("#-ANGER")
 G.add_node("#-JOY")
 G.add_node("#-SAD")
 
+# anger is a partial linear combination of sad fix this and retrain
+
 endpoints = {
     "#-ANGER": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-    "#-JOY": [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
-    "#-SAD": [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+    "#-JOY":   [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+    "#-SAD":   [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
 }
 
 k = 0
@@ -136,4 +137,4 @@ weights = [G[u][v]['weight'] for u,v in edges]"""
 # 4:05pm: 4100 nodes inserted
 
 # nx.write_graphml(G, "graph_outputs/tokenized_output_" + str(maximum) + "_wo_neutral.graphml")
-nx.write_gpickle(G, "graph_outputs/pickled_output_" + str(maximum) + "_wo_neutral.gpickle")
+nx.write_gpickle(G, "graph_outputs/iterations/large_epsilon_small_endpoint_radius_and_cost_pickled_output_" + str(maximum) + "_wo_neutral.gpickle")

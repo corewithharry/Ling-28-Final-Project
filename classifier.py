@@ -25,7 +25,7 @@ from progress.bar import Bar
 EMOLEX_PATH = "datasets/emolex/emolex.txt"
 
 bar = Bar('Loading Graph', max=100)
-G = nx.read_gpickle("graph_outputs/pickled_output_14100_wo_neutral.gpickle")
+G = nx.read_gpickle("graph_outputs/iterations/large_epsilon_small_endpoint_radius_and_cost_pickled_output_14100_wo_neutral.gpickle")
 
 for i in range(0, 100):
     bar.next()
@@ -85,6 +85,9 @@ def passage_to_bag(passage):
 # takes approx 30 seconds to classify one word ... fuck
 
 """
+Classifying: # Joy Example
+Parsing Sentence |################################| 333/333
+====================================
 # Keyword: interesting has emotion: (1.285520784778797, '#-JOY')
 # Keyword: learn has emotion: (1.285520784778797, '#-JOY')
 # Keyword: irrelevant has emotion: (1.285520784778797, '#-ANGER')
@@ -107,6 +110,34 @@ def passage_to_bag(passage):
 # Keyword: difficult has emotion: (1.5902273736421793, '#-ANGER')
 # Keyword: professor has emotion: (1.3585900955005383, '#-JOY')
 # Keyword: recommend has emotion: (1.3585900955005383, '#-JOY')
+Classifying: # Angry Example
+Parsing Sentence |################################| 155/155
+====================================
+# Keyword: avoid has emotion: (1.358590095500538, '#-ANGER')
+# Keyword: physics has emotion: (1.285520784778797, '#-JOY')
+# Keyword: teach has emotion: (1.285606476604563, '#-JOY')
+# Keyword: included has emotion: (1.285520784778797, '#-JOY')
+# Keyword: teach has emotion: (1.285606476604563, '#-JOY')
+# Keyword: content has emotion: (1.1791950777402727, '#-JOY')
+# Keyword: weight has emotion: (1.5903639496948447, '#-SAD')
+# Keyword: show has emotion: (1.5902273736421795, '#-ANGER')
+# Keyword: useless has emotion: (1.285520784778797, '#-ANGER')
+# Keyword: good has emotion: (1.357860058863077, '#-JOY')
+# Keyword: bad has emotion: (1.3578600588630765, '#-ANGER')
+# Keyword: warning has emotion: (1.5902273736421793, '#-ANGER')
+Classifying: # Sad Example
+Parsing Sentence |################################| 50/50
+====================================
+# Keyword: professor has emotion: (1.3585900955005383, '#-JOY')
+# Keyword: depression has emotion: (0.9998000599800069, '#-SAD')
+# Keyword: sadness has emotion: (1.1791950777402727, '#-SAD')
+# Keyword: cry has emotion: (0.9998000599800069, '#-SAD')
+# Keyword: difficult has emotion: (1.5902273736421793, '#-ANGER')
+# Keyword: constant has emotion: (1.3585900955005383, '#-JOY')
+# Keyword: depression has emotion: (0.9998000599800069, '#-SAD')
+# Keyword: tragic has emotion: (1.285520784778797, '#-ANGER')
+# Keyword: bad has emotion: (1.3578600588630765, '#-ANGER')
+- Done in 19 minutes 02 secs
 """
 
 def classify(passage):
@@ -125,14 +156,14 @@ def classify(passage):
                 print("No path between " + emotion + " and " + str(keyword))
 
         if len(paths) > 0:        
-            print("# Keyword: " + keyword + " has emotion: " + str(min(paths)))
+            print("# Keyword: " + keyword + " has emotion: " + str(paths))
         else:
             print("# Cannot classify: " + keyword)
 
     return keywords
     # todo:
-    # check if word exists within the graph
-    # find the closest end-point
+    # check if word exists within the graph - DONE
+    # find the closest end-point - DONE
     # multiply by gamma 
 
 passages = [("# Joy Example", joyExample), ("# Angry Example", angerExample), ("# Sad Example", sadExample)]
