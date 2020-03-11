@@ -24,20 +24,13 @@ from progress.bar import Bar
 
 EMOLEX_PATH = "datasets/emolex/emolex.txt"
 
-bar = Bar('Loading Graph', max=100)
+print("Loading in Graph...")
 G = nx.read_gpickle("graph_outputs/iterations/v2/large_epsilon_small_endpoint_radius_and_cost_pickled_output_14100_wo_neutral.gpickle")
-
-for i in range(0, 100):
-    bar.next()
-
-bar.finish()
-
-time.sleep(1)
 
 PROFESSOR_REVIEWS = "datasets/corpus/professor_reviews_full.txt"
 
-reviews = open(PROFESSOR_REVIEWS).read().split("@")
-information = {}
+# reviews = open(PROFESSOR_REVIEWS).read().split("@")
+# information = {}
 
 # categorize the data into PROFESSOR -> { COURSE_ID -> [ REVIEWS ]}
 """
@@ -64,23 +57,32 @@ angerExample = """AVOID AT ALL COSTS! Does this man know physics, it seems so. C
 
 sadExample = """Sitting professor X's class always filled me with strong depression and sadness; I would cry every week during the X-hours and the p-sets were so difficult it added to my constant class depression; it is quite tragic and emotional how bad this class made me feel."""
 
+"""
+Converts a paragraph of text into bag format of tokenized sentences
+"""
 def passage_to_bag(passage):
     bag = []
+
+    # stop words will reduce words being classified including 'the', 'and' etc
     stop_words = set(stopwords.words('english'))
+
+    # split the passage into a series of tokenized sentences
     sentences = sent_tokenize(passage)
 
     bar = Bar('Parsing Sentence', max=len(sentences))
 
     for sentence in sentences:
+        # split each sentence into a series of tokenized words
         tokenized = word_tokenize(sentence)
 
         subBag = []
-        # convert to bag of words
+
         for word in tokenized:
             if word not in stop_words:
                 subBag.append(word.lower())
         
         bag.append(subBag)
+        
         bar.next()
         time.sleep(0.01)
 
@@ -88,20 +90,26 @@ def passage_to_bag(passage):
 
     return bag
 
+"""
+Given a list of scores from each sentence, will generate the necessary classification.
+"""
+
 def score_phrase(scores):
-    rating = {"#-ANGER": 0, "#-JOY": 0, "#-SAD": 0}
+    rating = {}
     bar = Bar('Scoring Passage', max=len(scores))
 
     for score, gamma in scores:
 
+        # extract the min (smallest path from word to emotion) classification
         classificiation = min(score)
+
         calculated_score = classificiation[0]
         label = classificiation[1]
 
         if label in rating:
-            rating[label] += calculated_score
+            rating[label] += (calculated_score * gamma)
         else:
-            rating[label] = calculated_score
+            rating[label] = (calculated_score * gamma)
 
         bar.next()
         time.sleep(0.01)
@@ -112,13 +120,23 @@ def score_phrase(scores):
         for key in rating:
             rating[key] = rating[key] / len(scores)
 
+        # the ratings are the summation of path lengths from a word to emotion
+        # the inverse is taken as small values should have big scores
+        for key in rating:
+            rating[key] = 1 / rating[key]
+
     return rating
 
 def classify(passage):
-    sentence_keywords = passage_to_bag(passage)    
-    pronouns = ["he", "him", "she", "her", "prof", "professor"]
-    gamma = 1.0
+    # convert the passage into sentences of keywords
 
+    sentence_keywords = passage_to_bag(passage)    
+    
+    # pronouns to detect if the sentence is relative to the professor
+    # if so, increase the gamma
+    pronouns = ["he", "him", "she", "her", "prof", "professor"]
+    
+    gamma = 1.0
     isProfessorSpecific = False
 
     i = 0
@@ -145,14 +163,14 @@ def classify(passage):
                         print("No path between " + emotion + " and " + str(keyword))
 
                 if len(paths) > 0:
-                    print("# Keyword: '" + keyword + "' has emotion: " + str(paths))
+                    # print("# Keyword: '" + keyword + "' has emotion: " + str(paths))
                     scores.append((paths, gamma))
                 else:
                     print("# Cannot classify: " + keyword)
 
         gamma = 1
         isProfessorSpecific = False
-        print(" * Sentence #" + str(i) +  " Output = " + str(score_phrase(scores)))
+        print(" * Sentence '" + str(" ".join(sentence)) + "' Output = " + str(score_phrase(scores)))
         i += 1
 
     # todo:
@@ -160,7 +178,7 @@ def classify(passage):
     # find the closest end-point - DONE
     # multiply by gamma 
 
-passages = [("# Angry Example", angerExample), ("# Sad Example", sadExample)]
+passages = [("# Sad Example", sadExample)]
 
 for passage in passages:
     print("Classifying: " + passage[0])
