@@ -25,7 +25,7 @@ from progress.bar import Bar
 EMOLEX_PATH = "datasets/emolex/emolex.txt"
 
 bar = Bar('Loading Graph', max=100)
-G = nx.read_gpickle("graph_outputs/iterations/large_epsilon_small_endpoint_radius_and_cost_pickled_output_14100_wo_neutral.gpickle")
+G = nx.read_gpickle("graph_outputs/iterations/v2/large_epsilon_small_endpoint_radius_and_cost_pickled_output_14100_wo_neutral.gpickle")
 
 for i in range(0, 100):
     bar.next()
@@ -67,106 +67,100 @@ sadExample = """Sitting professor X's class always filled me with strong depress
 def passage_to_bag(passage):
     bag = []
     stop_words = set(stopwords.words('english'))
-    tokenized = word_tokenize(passage)
+    sentences = sent_tokenize(passage)
 
-    bar = Bar('Parsing Sentence', max=len(tokenized))
+    bar = Bar('Parsing Sentence', max=len(sentences))
 
-    # convert to bag of words
-    for word in tokenized:
-        if word not in stop_words:
-            if G.has_node(word.lower()):
-                bag.append(word.lower())
+    for sentence in sentences:
+        tokenized = word_tokenize(sentence)
+
+        subBag = []
+        # convert to bag of words
+        for word in tokenized:
+            if word not in stop_words:
+                subBag.append(word.lower())
+        
+        bag.append(subBag)
         bar.next()
         time.sleep(0.01)
+
     bar.finish()
 
     return bag
 
-# takes approx 30 seconds to classify one word ... fuck
+def score_phrase(scores):
+    rating = {"#-ANGER": 0, "#-JOY": 0, "#-SAD": 0}
+    bar = Bar('Scoring Passage', max=len(scores))
 
-"""
-Classifying: # Joy Example
-Parsing Sentence |################################| 333/333
-====================================
-# Keyword: interesting has emotion: (1.285520784778797, '#-JOY')
-# Keyword: learn has emotion: (1.285520784778797, '#-JOY')
-# Keyword: irrelevant has emotion: (1.285520784778797, '#-ANGER')
-# Keyword: giving has emotion: (1.285520784778797, '#-JOY')
-# Keyword: recommend has emotion: (1.3585900955005383, '#-JOY')
-# Keyword: recommend has emotion: (1.3585900955005383, '#-JOY')
-# Keyword: cool has emotion: (1.285520784778797, '#-JOY')
-# Keyword: good has emotion: (1.357860058863077, '#-JOY')
-# Keyword: job has emotion: (1.285520784778797, '#-JOY')
-# Keyword: public has emotion: (1.3585900955005386, '#-JOY')
-# Keyword: important has emotion: (1.3585900955005383, '#-JOY')
-# Keyword: interesting has emotion: (1.285520784778797, '#-JOY')
-# Keyword: time has emotion: (1.5902273736421795, '#-ANGER')
-# Keyword: reading has emotion: (1.285520784778797, '#-JOY')
-# Keyword: pay has emotion: (1.285606476604563, '#-JOY')
-# Keyword: attention has emotion: (1.285520784778797, '#-JOY')
-# Keyword: reading has emotion: (1.285520784778797, '#-JOY')
-# Keyword: demand has emotion: (0.9998000599800069, '#-ANGER')
-# Keyword: study has emotion: (1.285520784778797, '#-JOY')
-# Keyword: difficult has emotion: (1.5902273736421793, '#-ANGER')
-# Keyword: professor has emotion: (1.3585900955005383, '#-JOY')
-# Keyword: recommend has emotion: (1.3585900955005383, '#-JOY')
-Classifying: # Angry Example
-Parsing Sentence |################################| 155/155
-====================================
-# Keyword: avoid has emotion: (1.358590095500538, '#-ANGER')
-# Keyword: physics has emotion: (1.285520784778797, '#-JOY')
-# Keyword: teach has emotion: (1.285606476604563, '#-JOY')
-# Keyword: included has emotion: (1.285520784778797, '#-JOY')
-# Keyword: teach has emotion: (1.285606476604563, '#-JOY')
-# Keyword: content has emotion: (1.1791950777402727, '#-JOY')
-# Keyword: weight has emotion: (1.5903639496948447, '#-SAD')
-# Keyword: show has emotion: (1.5902273736421795, '#-ANGER')
-# Keyword: useless has emotion: (1.285520784778797, '#-ANGER')
-# Keyword: good has emotion: (1.357860058863077, '#-JOY')
-# Keyword: bad has emotion: (1.3578600588630765, '#-ANGER')
-# Keyword: warning has emotion: (1.5902273736421793, '#-ANGER')
-Classifying: # Sad Example
-Parsing Sentence |################################| 50/50
-====================================
-# Keyword: professor has emotion: (1.3585900955005383, '#-JOY')
-# Keyword: depression has emotion: (0.9998000599800069, '#-SAD')
-# Keyword: sadness has emotion: (1.1791950777402727, '#-SAD')
-# Keyword: cry has emotion: (0.9998000599800069, '#-SAD')
-# Keyword: difficult has emotion: (1.5902273736421793, '#-ANGER')
-# Keyword: constant has emotion: (1.3585900955005383, '#-JOY')
-# Keyword: depression has emotion: (0.9998000599800069, '#-SAD')
-# Keyword: tragic has emotion: (1.285520784778797, '#-ANGER')
-# Keyword: bad has emotion: (1.3578600588630765, '#-ANGER')
-- Done in 19 minutes 02 secs
-"""
+    for score, gamma in scores:
+
+        classificiation = min(score)
+        calculated_score = classificiation[0]
+        label = classificiation[1]
+
+        if label in rating:
+            rating[label] += calculated_score
+        else:
+            rating[label] = calculated_score
+
+        bar.next()
+        time.sleep(0.01)
+
+    bar.finish()
+    
+    if len(scores) > 0:
+        for key in rating:
+            rating[key] = rating[key] / len(scores)
+
+    return rating
 
 def classify(passage):
-    keywords = passage_to_bag(passage)    
+    sentence_keywords = passage_to_bag(passage)    
+    pronouns = ["he", "him", "she", "her", "prof", "professor"]
+    gamma = 1.0
 
+    isProfessorSpecific = False
+
+    i = 0
     print("====================================")
-    for keyword in keywords:
-        types = ["#-ANGER", "#-JOY", "#-SAD"]
-        paths = []
+    for sentence in sentence_keywords:
+        scores = []
+        
+        for keyword in sentence:
+            if keyword in pronouns:
+                isProfessorSpecific = True
+            
+            if isProfessorSpecific:
+                gamma = 1.5
 
-        for emotion in types:
-            try:
-                path = (nx.dijkstra_path_length(G, source=emotion, target=keyword), emotion)
-                paths.append(path)
-            except:
-                print("No path between " + emotion + " and " + str(keyword))
+            if G.has_node(keyword.lower()):
+                types = ["#-ANGER", "#-JOY", "#-SAD"]
+                paths = []
 
-        if len(paths) > 0:        
-            print("# Keyword: " + keyword + " has emotion: " + str(paths))
-        else:
-            print("# Cannot classify: " + keyword)
+                for emotion in types:
+                    try:
+                        path = (nx.dijkstra_path_length(G, source=emotion, target=keyword), emotion)
+                        paths.append(path)
+                    except:
+                        print("No path between " + emotion + " and " + str(keyword))
 
-    return keywords
+                if len(paths) > 0:
+                    print("# Keyword: '" + keyword + "' has emotion: " + str(paths))
+                    scores.append((paths, gamma))
+                else:
+                    print("# Cannot classify: " + keyword)
+
+        gamma = 1
+        isProfessorSpecific = False
+        print(" * Sentence #" + str(i) +  " Output = " + str(score_phrase(scores)))
+        i += 1
+
     # todo:
     # check if word exists within the graph - DONE
     # find the closest end-point - DONE
     # multiply by gamma 
 
-passages = [("# Joy Example", joyExample), ("# Angry Example", angerExample), ("# Sad Example", sadExample)]
+passages = [("# Angry Example", angerExample), ("# Sad Example", sadExample)]
 
 for passage in passages:
     print("Classifying: " + passage[0])

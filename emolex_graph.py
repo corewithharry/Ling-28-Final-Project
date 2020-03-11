@@ -61,10 +61,12 @@ G.add_node("#-SAD")
 
 # anger is a partial linear combination of sad fix this and retrain
 
+# anger, anticipation, disgust, fear, joy, negative, positive, sadness, surprise, trust
+
 endpoints = {
     "#-ANGER": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-    "#-JOY":   [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
-    "#-SAD":   [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+    "#-JOY":   [0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+    "#-SAD":   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
 }
 
 k = 0
@@ -137,4 +139,4 @@ weights = [G[u][v]['weight'] for u,v in edges]"""
 # 4:05pm: 4100 nodes inserted
 
 # nx.write_graphml(G, "graph_outputs/tokenized_output_" + str(maximum) + "_wo_neutral.graphml")
-nx.write_gpickle(G, "graph_outputs/iterations/large_epsilon_small_endpoint_radius_and_cost_pickled_output_" + str(maximum) + "_wo_neutral.gpickle")
+nx.write_gpickle(G, "graph_outputs/iterations/v3/large_epsilon_small_endpoint_radius_and_cost_pickled_output_" + str(maximum) + "_wo_neutral.gpickle")
