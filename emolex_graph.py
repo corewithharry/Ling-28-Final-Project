@@ -23,25 +23,17 @@ MODEL_PATH = "models/BrownWord2Vec.model"
 VECTOR_PATH = "datasets/weights/cornell_small_vectors.csv"
 EMOLEX_PATH = "datasets/emolex/emolex.txt"
 
-# brown_corpus = brown.sents()
-model = Word2Vec.load(MODEL_PATH) # Word2Vec(brown_corpus)
-# returns a list of uncategorized words in the corpus
-corpus = get_corpus(CORPUS_LOCATION)
-vectors = loadtxt(VECTOR_PATH, delimiter=',')
-
 G = nx.Graph()
 
-# word to vec hash map
-w2v = dict()
-
 # maximum Euclidean distance between two words
-epsilon = 10.0
+epsilon = 2.0
 cost_threshold = 0.95 # 0.6 # the maximum edge weight (1 - cos similarity) i.e. closer to 0 means similar, 1 means totally not similare
 endpoint_radius = 0.25 # 0.85 # minimum cosine similarity
 
-# prob_model = generate_MLE('datasets/small_reviews/pos', 'datasets/small_reviews/neg')
-
 emolex = generate_emolex_vectors(EMOLEX_PATH)
+
+max_vec = float("-inf")
+max_word = None
 
 locations = emolex.keys()
 
@@ -64,8 +56,8 @@ G.add_node("#-SAD")
 # anger, anticipation, disgust, fear, joy, negative, positive, sadness, surprise, trust
 
 endpoints = {
-    "#-ANGER": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-    "#-JOY":   [0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+    "#-ANGER": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "#-JOY":   [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     "#-SAD":   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
 }
 
@@ -100,17 +92,6 @@ for w_i in emolex:
                     similarity_score = similarity(emolex[w_i], emolex[w_j])
                     similarity_cost = max(1 - similarity_score, 0.01)
 
-                    """
-                    prob_i_j = prob_model.score(w_i, [w_j])
-                    prob_j_i = prob_model.score(w_j, [w_i])
-
-                    print(w_i + " -> " + w_j + " : " + str(prob_i_j))
-                    print(w_i + " <- " + w_j + " : " + str(prob_j_i))
-
-                    context_cost_i_to_j = 1 / (max(prob_i_j, 0.1))
-                    # context_cost_j_to_i = 1 / max(prob_j_i, 0.00001)
-                    """
-
                     if similarity_cost < cost_threshold:
                         G.add_edge(w_i, w_j, weight=similarity_cost)
                         
@@ -124,12 +105,6 @@ for w_i in emolex:
 
     i += 1
 
-"""pos = nx.spring_layout(G)
-
-edges = G.edges()
-colors = [G[u][v]['color'] for u,v in edges]
-weights = [G[u][v]['weight'] for u,v in edges]"""
-
 # nx.draw(G, pos, edges=edges, edge_color=colors, width=weights, with_labels=True)
 # nx.draw(G, pos, edges=edges, edge_color=colors, width=weights, with_labels=True)
 # plt.show()
@@ -139,4 +114,4 @@ weights = [G[u][v]['weight'] for u,v in edges]"""
 # 4:05pm: 4100 nodes inserted
 
 # nx.write_graphml(G, "graph_outputs/tokenized_output_" + str(maximum) + "_wo_neutral.graphml")
-nx.write_gpickle(G, "graph_outputs/iterations/v3/large_epsilon_small_endpoint_radius_and_cost_pickled_output_" + str(maximum) + "_wo_neutral.gpickle")
+nx.write_gpickle(G, "graph_outputs/iterations/v3/small_epsilon_small_endpoint_radius_and_cost_pickled_output_" + str(maximum) + "_wo_neutral.gpickle")
