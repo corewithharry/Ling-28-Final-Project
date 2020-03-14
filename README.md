@@ -47,8 +47,6 @@ python3 testing.py
 
 Which should return a classification report and associated confusion matrix.
 
-```
-
 ## Built With
 
 * [NLTK](https://www.nltk.org/) - NTLK Natural Language Processing Library for Python
