@@ -21,7 +21,9 @@ It is recommended that you use Python3 as it was developed using this version.
 
 ### Installing
 
-Once you have cloned the repository, you can create the SentiGraph by running:
+Once you have cloned the repository, you need to setup the output directory for the graphs. Create a folder called 'graph_outputs' and inside that another folder 'v3' (this will hold the output of the graph). The graph is generated as a .pickle python output which converts the 
+
+you can create the SentiGraph by running:
 
 ```
 python3 emolex_graph.py
