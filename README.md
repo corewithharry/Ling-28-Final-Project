@@ -1,4 +1,4 @@
-# SentiGraph: a graph-based approach to determine passage sentiment.
+# SentiGraph: a graph-based approach for sentiment analysis.
 
 A sentiment analysis engine built in Python utilizing the EmoLex lexicon.
 
@@ -8,73 +8,56 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+What things you need to install the software and how to install them:
 
 ```
-Give examples
+1. NetworkX - Python graph building software (pip3 install NetworkX).
+2. Gensim - Word2Vec models (pip3 install gensim).
+3. MatPlotLib - Basic graph visualization software (pip3 install matplotlib).
+4. NLTK - Python NLP library. (pip3 install nltk)
 ```
+
+It is recommended that you use Python3 as it was developed using this version.
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+Once you have cloned the repository, you can create the SentiGraph by running:
 
 ```
-Give the example
+python3 emolex_graph.py
 ```
 
-And repeat
+This will take around 20-30 minutes to create, so follow the on-screen dialogs for progress; modify the internal variables as you see fit including the output file location for the graph etc.
+
+## Classifying Sentiment
+
+Included are three files relating to anger, sadness, and joy. You can analyse any passage you like by specifying them in classifier.py and then classify by running:
 
 ```
-until finished
+python3 classifier.py
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+### Validation Testing
 
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
+To run the tests as documented in the paper, make sure you have the associated validation test passages inside your testing folder; then run:
 
 ```
-Give an example
+python3 testing.py
 ```
 
-### And coding style tests
-
-Explain what these tests test and why
+Which should return a classification report and associated confusion matrix.
 
 ```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+* [NLTK](https://www.nltk.org/) - NTLK Natural Language Processing Library for Python
+* [EmoLex](https://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm) - EmoLex Lexicon containing 14,000+ words.
+* [Sklearn](https://scikit-learn.org/stable/) - Scikit-Learn for Python
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+* **John McCambridge** - *Initial work*
 
 ## License
 
@@ -82,6 +65,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+I would like to give thanks to Prof. Rolando A. Coto Solano of Dartmouth College for his strong guidance and informative criticism during the pursuit of this project.
