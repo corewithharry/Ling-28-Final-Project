@@ -2,6 +2,8 @@
 
 A sentiment analysis engine built in Python utilizing the EmoLex lexicon.
 
+![Main UI](https://i.ibb.co/kGcPcvd/Screen-Shot-2020-07-13-at-8-29-43-PM.png)
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
